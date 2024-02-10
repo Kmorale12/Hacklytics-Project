@@ -6,8 +6,7 @@ st.text("HIV is a common disease that compromises patients immune system and lim
 st.text("Furthermore due to HIV's high mutation rate, its treatment life long anti retroviral therapy may have to change in patients and hiv devlops drug resitance within their bodies.")
 st.text("The goal of this website is to analyze HIV sequences from patients, and determine which drugs are suitiable for retroviral therapy")
 HIV_Consesus_Genome_Upload = st.file_uploader("Upload your sequence")
-# sierrapy fasta sequences_Test_HIV_Genome.fasta
-
+subprocess.call(['sierrapy', 'fasta', 'sequences.fasta', '-o', 'test.json'], shell=True) #Run under Windows 
     
 # with open('test.json', 'r') as file:
 #     # Load the JSON data into a dictionary
