@@ -1,13 +1,40 @@
 import streamlit as st
 import json 
 import subprocess
+import tempfile
+
 st.title("HIV Treatment Server")
 st.text("HIV is a common disease that compromises patients immune system and limits their ability to fight infections.")
 st.text("Furthermore due to HIV's high mutation rate, its treatment life long anti retroviral therapy may have to change in patients and hiv devlops drug resitance within their bodies.")
 st.text("The goal of this website is to analyze HIV sequences from patients, and determine which drugs are suitiable for retroviral therapy")
 HIV_Consesus_Genome_Upload = st.file_uploader("Upload your sequence")
-subprocess.call(['sierrapy', 'fasta', 'sequences.fasta', '-o', 'test.json'], shell=True) #Run under Windows 
+
+# If statement to check if object is not null
+if HIV_Consesus_Genome_Upload is not None:
+    content = HIV_Consesus_Genome_Upload.read().decode('utf-8')
     
+    # Save the uploaded file to a temporary location
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file.write(content.encode())
+        temp_file_path = temp_file.name
+    
+    # Check that file has extension type '.fasta'
+    if (temp_file_path.lower().endswith('.fasta')):
+        st.text("Hi")
+
+        # Try-catch block to check if file/server/etc is up
+        try:
+            # Run command, pass in the temporary file path
+            subprocess.call(['sierrapy', 'fasta', temp_file_path, '-o', 'test4433343443.json'], shell=True) #Run under Windows 
+        
+        # Exception block: print out errors, end program, pass errors into variable to be displayed.
+        except Exception as error:
+            # handle the exception
+            print("An exception occurred:", error) # An exception occurred: <EXCEPTION>
+
+    else:
+        st.text("ERROR: file must be of type .fasta")
+
 # with open('test.json', 'r') as file:
 #     # Load the JSON data into a dictionary
 #     data = json.load(file)
