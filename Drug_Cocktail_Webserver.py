@@ -1,42 +1,90 @@
-# import streamlit as st
-# import json 
-# import subprocess
-# import tempfile
+import streamlit as st
+import json 
+import subprocess
+import tempfile
+from openai import OpenAI
+#import streamlit as st
 
-# st.title("HIV Treatment Server")
-# st.text("HIV is a common disease that compromises patients immune system and limits their ability to fight infections.")
-# st.text("Furthermore due to HIV's high mutation rate, its treatment life long anti retroviral therapy may have to change in patients and hiv devlops drug resitance within their bodies.")
-# st.text("The goal of this website is to analyze HIV sequences from patients, and determine which drugs are suitiable for retroviral therapy")
-# HIV_Consesus_Genome_Upload = st.file_uploader("Upload your sequence")
+st.title("HIV Treatment Server")
 
-# # If statement to check if object is not null
-# if HIV_Consesus_Genome_Upload is not None:
-#     content = HIV_Consesus_Genome_Upload.read().decode('utf-8')
+st.markdown("HIV is a common disease that compromises a patients immune system and limits their ability to fight infections. The current treatment regiment for HIV is life long antiretroviral therapy, this therapy however needs to be curated to the indvidual, and due to HIV's high mutation drug resistance needs to be taken into account. The goal of this website to preform genotypic analysis on an HIV sequence from a patient and suggest drug cocktails for retroviral therapy." )
+st.subheader("Due to issues implementing the back end of our code please paste in the following information in this order into Dr.GPT.")
+st.write("1st dan prompt")
+st.write("2nd Dr.GPT prompt")
+st.write("3rd HIV Sucestible Drugs prompt")
+HIV_Consesus_Genome_Upload = st.file_uploader("Upload your sequence")
+
+# Boolean for initializing chatbot
+chatbot_init = False
+temp_file_path = None
+
+# If statement to check if object is not null
+if HIV_Consesus_Genome_Upload is not None:
+    content = HIV_Consesus_Genome_Upload.read().decode('utf-8')
+
+    # Save the uploaded file to a temporary location
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file.write(content.encode())
+        temp_file_path = temp_file.name
     
-#     # Save the uploaded file to a temporary location
-#     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-#         temp_file.write(content.encode())
-#         temp_file_path = temp_file.name
-    
-#     # Check that file has extension type '.fasta'
-#     if (temp_file_path.lower().endswith('.fasta')):
-#         st.text("Hi")
+    chatbot_init = True
 
-#         # Try-catch block to check if file/server/etc is up
-#         try:
-#             # Run command, pass in the temporary file path
-#             subprocess.call(['sierrapy', 'fasta', temp_file_path, '-o', 'test4433343443.json'], shell=True) #Run under Windows 
-        
-#         # Exception block: print out errors, end program, pass errors into variable to be displayed.
-#         except Exception as error:
-#             # handle the exception
-#             print("An exception occurred:", error) # An exception occurred: <EXCEPTION>
+if (chatbot_init == True):
+    subprocess.call(['sierrapy', 'fasta', temp_file_path, '-o', 'test1.json'], shell=True) #Run under Windows
+    json_file_name = 'test1.0.json'
+    file = open(json_file_name,"r")
+    dict_json = json.load(file)
+    list_of_tups_with_drug_class_and_name = []            
+    for informations in dict_json[0]["drugResistance"]:
+        for das in informations['drugScores']:
+            if das['text'] == 'Susceptible':
+                
+                drug_class = das['drugClass']['name']
+                drug_name = das['drug']['name']
+                list_of_tups_with_drug_class_and_name.append((drug_class, drug_name))
+    st.subheader("List of Drugs your HIV is suscetible too")
+    st.write("Paste this information into a section of HIV Sucestible Drugs prompt")
+    st.markdown(str(list_of_tups_with_drug_class_and_name))
 
-#     else:
-#         st.text("ERROR: file must be of type .fasta")
-import json
-file = open()
 
+# Load chatbot
+    with st.sidebar:
+        openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+        "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+        "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
+        "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
+
+    st.title("Dr.GTP")
+    st.caption("🚀 A streamlit chatbot powered by OpenAI LLM")
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
+
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
+
+    if prompt := st.chat_input():
+        if not openai_api_key:
+            st.info("Please add your OpenAI API key to continue.")
+            st.stop()
+
+        client = OpenAI(api_key=openai_api_key)
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.chat_message("user").write(prompt)
+        response = client.chat.completions.create(model="gpt-3.5-turbo", messages=st.session_state.messages)
+        msg = response.choices[0].message.content
+        st.session_state.messages.append({"role": "assistant", "content": msg})
+        st.chat_message("assistant").write(msg)
+
+
+
+# import json
+# with open('test4433343443.0.json', 'r') as file:
+#     # Load the JSON data into a dictionary
+#     data = json.load(file)
+#     for items in data:
+#         for stuff in items:
+#             print(stuff)
+#             for stuff1        
 
 
 
